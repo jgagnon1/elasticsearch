@@ -516,7 +516,7 @@ public class CacheRecycler {
 //        Arrays.fill(ints, sentinal);
 //        ref.add(ints);
         push++;
-        if (lastLogged <= System.currentTimeMillis() + 5 * 60 * 1000) {
+        if (System.currentTimeMillis() >= lastLogged + 5 * 60 * 1000) {
             logger.info("[push/pop ratio][{}/{}]", push, pop);
             lastLogged = System.currentTimeMillis();
         }
