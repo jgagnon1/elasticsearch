@@ -489,7 +489,11 @@ public class CacheRecycler {
 //        }
 //        return ints;
         pop++;
-        return new int[size];
+        int[] ints = new int[size];
+        if (sentinal != 0) {
+                Arrays.fill(ints, sentinal);
+        }
+        return ints;
     }
 
     public static void pushIntArray(int[] ints) {

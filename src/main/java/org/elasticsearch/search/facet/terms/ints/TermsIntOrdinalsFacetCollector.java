@@ -235,8 +235,7 @@ public class TermsIntOrdinalsFacetCollector extends AbstractFacetCollector {
         public ReaderAggregator(IntFieldData fieldData) {
             this.values = fieldData.values();
             // Still call the CacheRecycler for logging but create new int array.
-            this.counts = new int[fieldData.values().length];
-            CacheRecycler.popIntArray(fieldData.values().length);
+            this.counts = CacheRecycler.popIntArray(fieldData.values().length);
         }
 
         @Override
