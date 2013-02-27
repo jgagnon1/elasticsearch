@@ -21,6 +21,7 @@ package org.elasticsearch.common;
 
 import gnu.trove.map.hash.*;
 import gnu.trove.set.hash.THashSet;
+import jsr166e.LongAdder;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.trove.ExtTDoubleObjectHashMap;
@@ -458,37 +459,18 @@ public class CacheRecycler {
 
     private static SoftWrapper<Queue<int[]>> intArray = new SoftWrapper<Queue<int[]>>();
 
+
+    protected static LongAdder push = new LongAdder();
+    protected static LongAdder pop = new LongAdder();
+    protected static long lastLogged = 0L;
+    protected static ESLogger logger = Loggers.getLogger(CacheRecycler.class);
+
     public static int[] popIntArray(int size) {
         return popIntArray(size, 0);
     }
 
     public static int[] popIntArray(int size, int sentinal) {
-//        size = size < 100 ? 100 : size;
-//        Queue<int[]> ref = intArray.get();
-//        if (ref == null) {
-//            int[] ints = new int[size];
-//            if (sentinal != 0) {
-//                Arrays.fill(ints, sentinal);
-//            }
-//            return ints;
-//        }
-//        int[] ints = ref.poll();
-//        if (ints == null) {
-//            ints = new int[size];
-//            if (sentinal != 0) {
-//                Arrays.fill(ints, sentinal);
-//            }
-//            return ints;
-//        }
-//        if (ints.length < size) {
-//            ints = new int[size];
-//            if (sentinal != 0) {
-//                Arrays.fill(ints, sentinal);
-//            }
-//            return ints;
-//        }
-//        return ints;
-        pop++;
+        pop.increment();
         int[] ints = new int[size];
         if (sentinal != 0) {
                 Arrays.fill(ints, sentinal);
@@ -500,24 +482,10 @@ public class CacheRecycler {
         pushIntArray(ints, 0);
     }
 
-    // We should use atomiclong, but we don't want to create useless contention.
-    // The ratio should be ok, even with some errors on them.
-    protected static long push = 0L;
-    protected static long pop = 0L;
-    protected static long lastLogged = 0L;
-    protected static ESLogger logger = Loggers.getLogger(CacheRecycler.class);
-
     public static void pushIntArray(int[] ints, int sentinal) {
-//        Queue<int[]> ref = intArray.get();
-//        if (ref == null) {
-//            ref = ConcurrentCollections.newQueue();
-//            intArray.set(ref);
-//        }
-//        Arrays.fill(ints, sentinal);
-//        ref.add(ints);
-        push++;
+        push.increment();
         if (System.currentTimeMillis() >= lastLogged + 5 * 60 * 1000) {
-            logger.info("[push/pop ratio][{}/{}]", push, pop);
+            logger.info("[push/pop ratio][{}/{}][{}]", push.longValue(), pop.longValue(), push.longValue()/pop.longValue());
             lastLogged = System.currentTimeMillis();
         }
 
