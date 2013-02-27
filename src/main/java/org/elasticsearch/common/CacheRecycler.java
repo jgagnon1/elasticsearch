@@ -21,6 +21,8 @@ package org.elasticsearch.common;
 
 import gnu.trove.map.hash.*;
 import gnu.trove.set.hash.THashSet;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.trove.ExtTDoubleObjectHashMap;
 import org.elasticsearch.common.trove.ExtTHashMap;
 import org.elasticsearch.common.trove.ExtTLongObjectHashMap;
@@ -461,44 +463,59 @@ public class CacheRecycler {
     }
 
     public static int[] popIntArray(int size, int sentinal) {
-        size = size < 100 ? 100 : size;
-        Queue<int[]> ref = intArray.get();
-        if (ref == null) {
-            int[] ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
-        }
-        int[] ints = ref.poll();
-        if (ints == null) {
-            ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
-        }
-        if (ints.length < size) {
-            ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
-        }
-        return ints;
+//        size = size < 100 ? 100 : size;
+//        Queue<int[]> ref = intArray.get();
+//        if (ref == null) {
+//            int[] ints = new int[size];
+//            if (sentinal != 0) {
+//                Arrays.fill(ints, sentinal);
+//            }
+//            return ints;
+//        }
+//        int[] ints = ref.poll();
+//        if (ints == null) {
+//            ints = new int[size];
+//            if (sentinal != 0) {
+//                Arrays.fill(ints, sentinal);
+//            }
+//            return ints;
+//        }
+//        if (ints.length < size) {
+//            ints = new int[size];
+//            if (sentinal != 0) {
+//                Arrays.fill(ints, sentinal);
+//            }
+//            return ints;
+//        }
+//        return ints;
+        pop++;
+        return new int[size];
     }
 
     public static void pushIntArray(int[] ints) {
         pushIntArray(ints, 0);
     }
 
+    // We should use atomiclong, but we don't want to create useless contention.
+    // The ratio should be ok, even with some errors on them.
+    protected static long push = 0L;
+    protected static long pop = 0L;
+    protected static long lastLogged = 0L;
+    protected static ESLogger logger = Loggers.getLogger(CacheRecycler.class);
+
     public static void pushIntArray(int[] ints, int sentinal) {
-        Queue<int[]> ref = intArray.get();
-        if (ref == null) {
-            ref = ConcurrentCollections.newQueue();
-            intArray.set(ref);
+//        Queue<int[]> ref = intArray.get();
+//        if (ref == null) {
+//            ref = ConcurrentCollections.newQueue();
+//            intArray.set(ref);
+//        }
+//        Arrays.fill(ints, sentinal);
+//        ref.add(ints);
+        push++;
+        if (lastLogged <= System.currentTimeMillis() + 5 * 60 * 1000) {
+            logger.info("[push/pop ratio][{}/{}]", push, pop);
+            lastLogged = System.currentTimeMillis();
         }
-        Arrays.fill(ints, sentinal);
-        ref.add(ints);
+
     }
 }
