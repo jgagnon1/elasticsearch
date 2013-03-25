@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.elasticsearch.ElasticSearchIllegalArgumentException;
-import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.Nullable;
 import org.elasticsearch.common.component.AbstractComponent;
 import org.elasticsearch.common.inject.Inject;
@@ -72,14 +71,11 @@ public class ThreadPool extends AbstractComponent {
         public static final String MERGE = "merge";
         public static final String CACHE = "cache";
         public static final String REFRESH = "refresh";
+        public static final String WARMER = "warmer";
         public static final String SNAPSHOT = "snapshot";
     }
 
-    static {
-        MetaData.addDynamicSettings(
-                "threadpool.*"
-        );
-    }
+    public static final String THREADPOOL_GROUP = "threadpool.";
 
     private volatile ImmutableMap<String, ExecutorHolder> executors;
 
@@ -99,8 +95,9 @@ public class ThreadPool extends AbstractComponent {
     public ThreadPool(Settings settings, @Nullable NodeSettingsService nodeSettingsService) {
         super(settings);
 
-        Map<String, Settings> groupSettings = settings.getGroups("threadpool");
+        Map<String, Settings> groupSettings = settings.getGroups(THREADPOOL_GROUP);
 
+        // TODO figure out the best defaults for *all* thread pools
         defaultExecutorTypeSettings = ImmutableMap.<String, Settings>builder()
                 .put(Names.GENERIC, settingsBuilder().put("type", "cached").put("keep_alive", "30s").build())
                 .put(Names.INDEX, settingsBuilder().put("type", "cached").build())
@@ -112,6 +109,7 @@ public class ThreadPool extends AbstractComponent {
                 .put(Names.FLUSH, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", 10).build())
                 .put(Names.MERGE, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", 20).build())
                 .put(Names.REFRESH, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", 10).build())
+                .put(Names.WARMER, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", Math.min(Runtime.getRuntime().availableProcessors() / 2, 5)).build())
                 .put(Names.CACHE, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", 4).build())
                 .put(Names.SNAPSHOT, settingsBuilder().put("type", "scaling").put("keep_alive", "5m").put("size", 5).build())
                 .build();

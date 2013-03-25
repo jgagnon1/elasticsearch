@@ -72,7 +72,7 @@ public class RestGetSettingsAction extends BaseRestHandler {
                 try {
                     MetaData metaData = response.state().metaData();
 
-                    if (metaData.indices().isEmpty()) {
+                    if (metaData.indices().isEmpty() && indices.length > 0) {
                         channel.sendResponse(new XContentThrowableRestResponse(request, new IndexMissingException(new Index(indices[0]))));
                         return;
                     }
