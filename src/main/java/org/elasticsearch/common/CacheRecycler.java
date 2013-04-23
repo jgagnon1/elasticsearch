@@ -70,7 +70,7 @@ public class CacheRecycler {
 
     // ----- ExtTHashMap -----
 
-    private static SoftWrapper<Queue<ExtTHashMap>> hashMap = new SoftWrapper<Queue<ExtTHashMap>>();
+    private final static SoftWrapper<Queue<ExtTHashMap>> hashMap = new SoftWrapper<Queue<ExtTHashMap>>();
 
     @SuppressWarnings("unchecked")
     public static <K, V> ExtTHashMap<K, V> popHashMap() {
@@ -97,7 +97,7 @@ public class CacheRecycler {
 
     // ----- THashSet -----
 
-    private static SoftWrapper<Queue<THashSet>> hashSet = new SoftWrapper<Queue<THashSet>>();
+    private final static SoftWrapper<Queue<THashSet>> hashSet = new SoftWrapper<Queue<THashSet>>();
 
     @SuppressWarnings("unchecked")
     public static <T> THashSet<T> popHashSet() {
@@ -124,7 +124,7 @@ public class CacheRecycler {
 
     // ------ ExtTDoubleObjectHashMap -----
 
-    private static SoftWrapper<Queue<ExtTDoubleObjectHashMap>> doubleObjectHashMap = new SoftWrapper<Queue<ExtTDoubleObjectHashMap>>();
+    private final static SoftWrapper<Queue<ExtTDoubleObjectHashMap>> doubleObjectHashMap = new SoftWrapper<Queue<ExtTDoubleObjectHashMap>>();
 
     @SuppressWarnings("unchecked")
     public static <T> ExtTDoubleObjectHashMap<T> popDoubleObjectMap() {
@@ -151,7 +151,7 @@ public class CacheRecycler {
 
     // ----- ExtTLongObjectHashMap ----
 
-    private static SoftWrapper<Queue<ExtTLongObjectHashMap>> longObjectHashMap = new SoftWrapper<Queue<ExtTLongObjectHashMap>>();
+    private final static SoftWrapper<Queue<ExtTLongObjectHashMap>> longObjectHashMap = new SoftWrapper<Queue<ExtTLongObjectHashMap>>();
 
     @SuppressWarnings("unchecked")
     public static <T> ExtTLongObjectHashMap<T> popLongObjectMap() {
@@ -178,7 +178,7 @@ public class CacheRecycler {
 
     // ----- TLongLongHashMap ----
 
-    private static SoftWrapper<Queue<TLongLongHashMap>> longLongHashMap = new SoftWrapper<Queue<TLongLongHashMap>>();
+    private final static SoftWrapper<Queue<TLongLongHashMap>> longLongHashMap = new SoftWrapper<Queue<TLongLongHashMap>>();
 
     public static TLongLongHashMap popLongLongMap() {
         Queue<TLongLongHashMap> ref = longLongHashMap.get();
@@ -204,7 +204,7 @@ public class CacheRecycler {
 
     // ----- TIntIntHashMap ----
 
-    private static SoftWrapper<Queue<TIntIntHashMap>> intIntHashMap = new SoftWrapper<Queue<TIntIntHashMap>>();
+    private final static SoftWrapper<Queue<TIntIntHashMap>> intIntHashMap = new SoftWrapper<Queue<TIntIntHashMap>>();
 
 
     public static TIntIntHashMap popIntIntMap() {
@@ -232,7 +232,7 @@ public class CacheRecycler {
 
     // ----- TFloatIntHashMap ---
 
-    private static SoftWrapper<Queue<TFloatIntHashMap>> floatIntHashMap = new SoftWrapper<Queue<TFloatIntHashMap>>();
+    private final static SoftWrapper<Queue<TFloatIntHashMap>> floatIntHashMap = new SoftWrapper<Queue<TFloatIntHashMap>>();
 
 
     public static TFloatIntHashMap popFloatIntMap() {
@@ -260,7 +260,7 @@ public class CacheRecycler {
 
     // ----- TDoubleIntHashMap ---
 
-    private static SoftWrapper<Queue<TDoubleIntHashMap>> doubleIntHashMap = new SoftWrapper<Queue<TDoubleIntHashMap>>();
+    private final static SoftWrapper<Queue<TDoubleIntHashMap>> doubleIntHashMap = new SoftWrapper<Queue<TDoubleIntHashMap>>();
 
 
     public static TDoubleIntHashMap popDoubleIntMap() {
@@ -288,7 +288,7 @@ public class CacheRecycler {
 
     // ----- TByteIntHashMap ---
 
-    private static SoftWrapper<Queue<TByteIntHashMap>> byteIntHashMap = new SoftWrapper<Queue<TByteIntHashMap>>();
+    private final static SoftWrapper<Queue<TByteIntHashMap>> byteIntHashMap = new SoftWrapper<Queue<TByteIntHashMap>>();
 
 
     public static TByteIntHashMap popByteIntMap() {
@@ -315,7 +315,7 @@ public class CacheRecycler {
 
     // ----- TShortIntHashMap ---
 
-    private static SoftWrapper<Queue<TShortIntHashMap>> shortIntHashMap = new SoftWrapper<Queue<TShortIntHashMap>>();
+    private final static SoftWrapper<Queue<TShortIntHashMap>> shortIntHashMap = new SoftWrapper<Queue<TShortIntHashMap>>();
 
 
     public static TShortIntHashMap popShortIntMap() {
@@ -343,7 +343,7 @@ public class CacheRecycler {
 
     // ----- TLongIntHashMap ----
 
-    private static SoftWrapper<Queue<TLongIntHashMap>> longIntHashMap = new SoftWrapper<Queue<TLongIntHashMap>>();
+    private final static SoftWrapper<Queue<TLongIntHashMap>> longIntHashMap = new SoftWrapper<Queue<TLongIntHashMap>>();
 
 
     public static TLongIntHashMap popLongIntMap() {
@@ -370,7 +370,7 @@ public class CacheRecycler {
 
     // ------ TObjectIntHashMap -----
 
-    private static SoftWrapper<Queue<TObjectIntHashMap>> objectIntHashMap = new SoftWrapper<Queue<TObjectIntHashMap>>();
+    private final static SoftWrapper<Queue<TObjectIntHashMap>> objectIntHashMap = new SoftWrapper<Queue<TObjectIntHashMap>>();
 
 
     @SuppressWarnings({"unchecked"})
@@ -396,9 +396,37 @@ public class CacheRecycler {
         ref.add(map);
     }
 
+    // ------ TIntObjectHashMap -----
+
+    private final static SoftWrapper<Queue<TIntObjectHashMap>> intObjectHashMap = new SoftWrapper<Queue<TIntObjectHashMap>>();
+
+
+    @SuppressWarnings({"unchecked"})
+    public static <T> TIntObjectHashMap<T> popIntObjectMap() {
+        Queue<TIntObjectHashMap> ref = intObjectHashMap.get();
+        if (ref == null) {
+            return new TIntObjectHashMap<T>();
+        }
+        TIntObjectHashMap<T> map = ref.poll();
+        if (map == null) {
+            return new TIntObjectHashMap<T>();
+        }
+        return map;
+    }
+
+    public static <T> void pushIntObjectMap(TIntObjectHashMap<T> map) {
+        Queue<TIntObjectHashMap> ref = intObjectHashMap.get();
+        if (ref == null) {
+            ref = ConcurrentCollections.newQueue();
+            intObjectHashMap.set(ref);
+        }
+        map.clear();
+        ref.add(map);
+    }
+
     // ------ TObjectFloatHashMap -----
 
-    private static SoftWrapper<Queue<TObjectFloatHashMap>> objectFloatHashMap = new SoftWrapper<Queue<TObjectFloatHashMap>>();
+    private final static SoftWrapper<Queue<TObjectFloatHashMap>> objectFloatHashMap = new SoftWrapper<Queue<TObjectFloatHashMap>>();
 
     @SuppressWarnings({"unchecked"})
     public static <T> TObjectFloatHashMap<T> popObjectFloatMap() {
@@ -425,7 +453,7 @@ public class CacheRecycler {
 
     // ----- int[] -----
 
-    private static SoftWrapper<Queue<Object[]>> objectArray = new SoftWrapper<Queue<Object[]>>();
+    private final static SoftWrapper<Queue<Object[]>> objectArray = new SoftWrapper<Queue<Object[]>>();
 
     public static Object[] popObjectArray(int size) {
         size = size < 100 ? 100 : size;
@@ -453,37 +481,16 @@ public class CacheRecycler {
         ref.add(objects);
     }
 
-
-    private static SoftWrapper<Queue<int[]>> intArray = new SoftWrapper<Queue<int[]>>();
+    private final static SoftWrapper<Queue<int[]>> intArray = new SoftWrapper<Queue<int[]>>();
 
     public static int[] popIntArray(int size) {
         return popIntArray(size, 0);
     }
 
     public static int[] popIntArray(int size, int sentinal) {
-        size = size < 100 ? 100 : size;
-        Queue<int[]> ref = intArray.get();
-        if (ref == null) {
-            int[] ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
-        }
-        int[] ints = ref.poll();
-        if (ints == null) {
-            ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
-        }
-        if (ints.length < size) {
-            ints = new int[size];
-            if (sentinal != 0) {
-                Arrays.fill(ints, sentinal);
-            }
-            return ints;
+        int[] ints = new int[size];
+        if (sentinal != 0) {
+            Arrays.fill(ints, sentinal);
         }
         return ints;
     }
@@ -493,12 +500,5 @@ public class CacheRecycler {
     }
 
     public static void pushIntArray(int[] ints, int sentinal) {
-        Queue<int[]> ref = intArray.get();
-        if (ref == null) {
-            ref = ConcurrentCollections.newQueue();
-            intArray.set(ref);
-        }
-        Arrays.fill(ints, sentinal);
-        ref.add(ints);
     }
 }
