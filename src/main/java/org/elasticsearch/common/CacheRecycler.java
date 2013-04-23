@@ -21,8 +21,6 @@ package org.elasticsearch.common;
 
 import gnu.trove.map.hash.*;
 import gnu.trove.set.hash.THashSet;
-import org.elasticsearch.common.logging.ESLogger;
-import org.elasticsearch.common.logging.Loggers;
 import org.elasticsearch.common.trove.ExtTDoubleObjectHashMap;
 import org.elasticsearch.common.trove.ExtTHashMap;
 import org.elasticsearch.common.trove.ExtTLongObjectHashMap;
@@ -31,7 +29,6 @@ import org.elasticsearch.common.util.concurrent.ConcurrentCollections;
 import java.lang.ref.SoftReference;
 import java.util.Arrays;
 import java.util.Queue;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class CacheRecycler {
 
@@ -484,11 +481,6 @@ public class CacheRecycler {
         ref.add(objects);
     }
 
-    protected static AtomicLong push = new AtomicLong();
-    protected static AtomicLong pop = new AtomicLong();
-    protected static long lastTimeLogged = 0L;
-    protected static ESLogger logger = Loggers.getLogger(CacheRecycler.class);
-
     private final static SoftWrapper<Queue<int[]>> intArray = new SoftWrapper<Queue<int[]>>();
 
     public static int[] popIntArray(int size) {
@@ -496,7 +488,6 @@ public class CacheRecycler {
     }
 
     public static int[] popIntArray(int size, int sentinal) {
-        pop.incrementAndGet();
         int[] ints = new int[size];
         if (sentinal != 0) {
             Arrays.fill(ints, sentinal);
@@ -509,10 +500,5 @@ public class CacheRecycler {
     }
 
     public static void pushIntArray(int[] ints, int sentinal) {
-        push.incrementAndGet();
-        if (System.currentTimeMillis() >= lastTimeLogged + 5 * 60 * 1000) {
-            lastTimeLogged = System.currentTimeMillis();
-            logger.debug("[push/pop ratio][{}/{}]", push.longValue(), pop.longValue());
-        }
     }
 }
